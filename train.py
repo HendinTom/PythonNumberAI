@@ -105,7 +105,7 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
             """
             ALL THINGS TO DO WITH THE PREVIOUS LAYER
             """
-
+            
 
         dir_batch_weights3_result = dir_batch_weights3_result/len(batch)
         dir_batch_bias3_result = dir_batch_bias3_result/len(batch)
@@ -125,6 +125,8 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
         # `labels` contains the ground truth digit (0-9) for each image
         print("Batch labels:", labels)  # Labels for the batch (tensor of integers)
         # print("\n")
+
+        print(model.weights3)
 
         model.biases3 = np.subtract(model.biases3, learning_rate * dir_batch_bias3_result)
         model.weights3 = np.subtract(model.weights3, learning_rate * dir_batch_weights3_result)
