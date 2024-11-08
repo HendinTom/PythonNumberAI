@@ -4,8 +4,6 @@ from torch.utils.data import DataLoader
 import pickle
 from simple_nn import SimpleNN
 
-#Testing change, will delete later
-
 def sig(x):
     return 1 / (1 + np.exp(-x))
 
