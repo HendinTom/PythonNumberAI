@@ -30,7 +30,7 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
 
         # dir_batch_weights3 = 0
 
-        dir_batch_weights3_result = np.array([ [0] * 10 ] * 16) # Creating an array that has 16 lists and each list has 10 elements to match the shape of the last layer
+        dir_batch_weights3_result = np.array([ [0] * 16 ] * 10) # Creating an array that has 16 lists and each list has 10 elements to match the shape of the last layer
         dir_batch_bias3_result = np.array([0] * 10) # Creating an array that has 10 items to match the bias in the last layer
         
         # Flatten each 28x28 image to a 784-dimensional vector
@@ -91,10 +91,10 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
             ALL THINGS TO DO WITH THE WEIGHTS
             """
             a2 = batch_a2[x] # When you work out the derivative of the weights, it comes out to the activation in the previous layer
-            a2_reshaped = np.tile(a2, (10, 1)).T  # Shape becomes (16, 10)
-            dir_z3_reshaped = dir_z3.reshape(1, 10)    # Shape becomes (1, 10)
-            dir_cost_reshaped = dir_cost.reshape(1, 10)  # Shape becomes (1, 10)
-            weights3_result = a2_reshaped * dir_z3_reshaped * dir_cost_reshaped  # Final shape is (16, 10)
+            a2_reshaped = np.tile(a2.reshape(1, -1), (10, 1))  # Shape becomes (10, 16)
+            dir_z3_reshaped = dir_z3.reshape(10, 1)    # Shape becomes (1, 10)
+            dir_cost_reshaped = dir_cost.reshape(10, 1)  # Shape becomes (1, 10)
+            weights3_result = a2_reshaped * dir_z3_reshaped * dir_cost_reshaped  # Final shape is (10, 16)
 
             dir_batch_weights3_result = np.add(dir_batch_weights3_result, weights3_result)
 
@@ -127,6 +127,9 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
         # `labels` contains the ground truth digit (0-9) for each image
         print("Batch labels:", labels)  # Labels for the batch (tensor of integers)
         # print("\n")
+
+        model.biases3 = np.subtract(model.biases3, learning_rate * dir_batch_bias3_result)
+        model.weights3 = np.subtract(model.weights3, learning_rate * dir_batch_weights3_result)
         break
 
 # Save the model parameters
