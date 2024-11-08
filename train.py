@@ -47,8 +47,6 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
 
         batch_a2 = model.a2
         batch_z3 = model.z3
-
-        weights3 = model.weights3
         
         for x in range(len(batch)):            
             last_layer = batch[x]
