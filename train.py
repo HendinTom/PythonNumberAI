@@ -105,13 +105,15 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
             """
             ALL THINGS TO DO WITH THE PREVIOUS LAYER
             """
-            
+            weights3_16x10 = model.weights3.T
+            dir_a2 = weights3_16x10.sum(axis=1) * dir_z3_reshaped * dir_cost_reshaped
+            print(dir_a2)
 
         dir_batch_weights3_result = dir_batch_weights3_result/len(batch)
         dir_batch_bias3_result = dir_batch_bias3_result/len(batch)
 
-        print("dir Weight3 results:", dir_batch_weights3_result)
-        print("dir bias3 results:", dir_batch_bias3_result)
+        # print("dir Weight3 results:", dir_batch_weights3_result)
+        # print("dir bias3 results:", dir_batch_bias3_result)
         
         # dir_batch_weights3 = dir_batch_weights3/len(batch) #Taking the average across the training examples for the derivative of weights3
 
@@ -125,8 +127,6 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
         # `labels` contains the ground truth digit (0-9) for each image
         print("Batch labels:", labels)  # Labels for the batch (tensor of integers)
         # print("\n")
-
-        print(model.weights3)
 
         model.biases3 = np.subtract(model.biases3, learning_rate * dir_batch_bias3_result)
         model.weights3 = np.subtract(model.weights3, learning_rate * dir_batch_weights3_result)
