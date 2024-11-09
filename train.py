@@ -30,6 +30,9 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
 
         # dir_batch_weights3 = 0
 
+        dir_batch_weights2_result = np.array([[0] * 16] * 16)
+        dir_batch_bias2_result = np.array([0] * 16)
+
         dir_batch_weights3_result = np.array([ [0] * 16 ] * 10) # Creating an array that has 16 lists and each list has 10 elements to match the shape of the last layer
         dir_batch_bias3_result = np.array([0] * 10) # Creating an array that has 10 items to match the bias in the last layer
         
@@ -45,7 +48,10 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
         batch = outputs[0] #This contains the last layer for one batch in the model
         batch_predictions = outputs[1] #This is the prediction the model makes for one batch
 
+        batch_a1 = model.a1
+        batch_z1 = model.z1
         batch_a2 = model.a2
+        batch_z2 = model.z2
         batch_z3 = model.z3
         
         for x in range(len(batch)):            
@@ -61,6 +67,7 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
             y = np.array([0] * 10) #Making an array of 10 zeros (using numpy because it is fast with the tradoff that I cannot change the array size)
             y[label] = 1 #Making the label which should be the index of the highest activation to 1 in the array
 
+            #!FIX THE SHAPES OF THE FIRST LAYER WHEN TRYING TO TRAIN
             """
             ALL THINGS TO DO WITH THE COST
             """
@@ -103,11 +110,62 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
             dir_batch_bias3_result = np.add(dir_batch_bias3_result, bias3_result)
 
             """
-            ALL THINGS TO DO WITH THE PREVIOUS LAYER
+            ALL THINGS TO DO WITH THE PREVIOUS LAYER (Layer 3 of 4)
             """
             weights3_16x10 = model.weights3.T
-            dir_a2 = weights3_16x10.sum(axis=1) * dir_z3_reshaped * dir_cost_reshaped
-            print(dir_a2)
+            dir_a2 = (weights3_16x10.sum(axis=1) * dir_z3_reshaped * dir_cost_reshaped).sum(axis=0)
+            
+            # print("dir of a2:", dir_a2)
+            # print("shape of dir of a2:", dir_a2.shape)
+
+            """
+            ALL THINGS TO DO WITH THE SIGMOID OF LAYER 3
+            """
+            z2 = batch_z2[x]
+            dir_z2 = sig_derivative(z2)
+
+            # print("dir shape of z2:", dir_z2.shape)
+            """
+            ALL THINGS TO DO WITH THE WEIGHTS OF LAYER 3
+            """
+            a1 = batch_a1[x]
+            a1_reshaped = np.tile(a1.reshape(1, -1), (16, 1))
+            dir_z2_reshaped = dir_z2.reshape(16, 1)
+            weights2_result = a1_reshaped * dir_z2_reshaped * dir_a2
+
+            dir_batch_weights2_result = np.add(dir_batch_weights2_result, weights2_result)
+
+            # print("Weights2 result:", weights2_result)
+            # print("Weights2 shape:", weights2_result.shape)
+            """
+            ALL THINGS TO DO WITH THE BIASES OF LAYER 3
+            """
+            bias2_result = dir_z2 * dir_a2
+            dir_batch_bias2_result = np.add(dir_batch_bias2_result, bias2_result)
+
+            # print("Bias2 result:", bias2_result)
+            # print("Bias2 result shape:", bias2_result.shape)
+
+            """
+            ALL THINGS TO DO WITH THE PREVIOUS PREVIOUS LAYER (LAYER 2 OF 4)
+            """
+            weights2_16x16 = model.weights2.T
+            dir_a1 = (weights2_16x16.sum(axis=1) * dir_z2_reshaped * dir_a2.reshape(16, 1)).sum(axis=0)
+
+            # print("dir of a1:", dir_a1)
+            # print("shape of dir of a1:", dir_a1.shape)
+
+            """
+            ALL THINGS TO DO WTIH THE SIGMOID OF LAYER 2
+            """
+            z1 = batch_z1[x]
+            dir_z1 = sig_derivative(z1)
+
+            # print("dir shape of z1:", dir_z1.shape)
+
+            """
+            ALL THINGS TO DO WITH THE WEIGHTS OF LAYER 2
+            """
 
         dir_batch_weights3_result = dir_batch_weights3_result/len(batch)
         dir_batch_bias3_result = dir_batch_bias3_result/len(batch)
