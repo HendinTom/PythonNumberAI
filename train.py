@@ -4,6 +4,8 @@ from torch.utils.data import DataLoader
 import pickle
 from simple_nn import SimpleNN
 
+# np.set_printoptions(threshold=np.inf)
+
 def sig(x):
     return 1 / (1 + np.exp(-x))
 
@@ -54,12 +56,12 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
         batch_z2 = model.z2
         batch_z3 = model.z3
         
-        for x in range(len(batch)):            
-            last_layer = batch[x]
+        for x in range(len(batch)):
+            last_layer = batch[x] #? IS EQUIVALENT TO a3 SO I WILL BE USING THAT AS A REPLACEMENT FOR IT
             prediction = batch_predictions[x]
             label = labels[x]
             print("")
-            print("Last Layer Activations:",last_layer)
+            # print("Last Layer Activations:", last_layer)
             print("Prediction of Model:", prediction)
             print("Actual Answer:", label)
 
@@ -78,8 +80,9 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
             dir_cost = np.multiply(2, cost_arr) # The dirivative of the cost being 2(activation - answer_activation) and the sum of that over the 10 activations in the last layer
             # dir_batch_cost_layer_4 += dir_cost # Adding the dirivative of the cost to the dirivative cost of the batch
 
-            print("array of cost:", cost_arr)
-            print("dirivative of cost:", dir_cost)
+            # print("array of cost:", cost_arr)
+            # print("dirivative of cost:", dir_cost)
+            # print("Shape of derivative of cost:", dir_cost.shape)
             print("cost:", cost)
 
             """
@@ -91,6 +94,7 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
 
             # print("z3", z3)
             # print("dirivative of z3", dir_z3)
+            print("Shape of derivative of z3:", dir_z3.shape)
 
             """
             ALL THINGS TO DO WITH THE WEIGHTS
@@ -103,6 +107,7 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
 
             dir_batch_weights3_result = np.add(dir_batch_weights3_result, weights3_result)
 
+            # print("Shape of a2:", dir_z3_reshaped.shape)
             """
             ALL THINGS TO DO WITH THE BIAS
             """
