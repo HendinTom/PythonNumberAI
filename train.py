@@ -41,9 +41,13 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
             output_error = output.flatten() - target
             
             # Gradients for weights and biases of each layer
-            d_weights3 = np.dot(output_error.reshape(-1, 1), model.a2.T.reshape(1, -1))  # Shape (10, 16)
-            d_biases3 = output_error
+            d_weights4 = np.dot(output_error.reshape(-1, 1), model.a3.T.reshape(1, -1))  # Shape (10, 16)
+            d_biases4 = output_error
             
+            hidden_error3 = (np.dot(model.weights4.T, output_error) * model.a3 * (1 - model.a3)).flatten()  # Flatten to shape (16,)
+            d_weights3 = np.dot(hidden_error3.reshape(-1, 1), model.a2.T.reshape(1, -1))  # Shape (16, 16)
+            d_biases3 = hidden_error3
+
             hidden_error2 = (np.dot(model.weights3.T, output_error) * model.a2 * (1 - model.a2)).flatten()  # Flatten to shape (16,)
             d_weights2 = np.dot(hidden_error2.reshape(-1, 1), model.a1.T.reshape(1, -1))  # Shape (16, 16)
             d_biases2 = hidden_error2
@@ -53,6 +57,8 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
             d_biases1 = hidden_error1
 
             # Gradient descent update
+            model.weights4 -= learning_rate * d_weights4
+            model.biases4 -= learning_rate * d_biases4[:, None]
             model.weights3 -= learning_rate * d_weights3
             model.biases3 -= learning_rate * d_biases3[:, None]
             model.weights2 -= learning_rate * d_weights2
@@ -72,6 +78,8 @@ def save_model(model, filename="trained_model.pkl"):
         "biases2": model.biases2,
         "weights3": model.weights3,
         "biases3": model.biases3,
+        "weights3": model.weights4,
+        "biases3": model.biases4,
     }
     with open(filename, "wb") as f:
         pickle.dump(model_params, f)
@@ -81,7 +89,7 @@ def save_model(model, filename="trained_model.pkl"):
 if __name__ == "__main__":
     train_data = load_mnist_data()
     model = SimpleNN()
-    train(model, train_data, epochs=10, learning_rate=0.01)
+    train(model, train_data, epochs=5, learning_rate=0.01)
     save_model(model)
 
     # train_loader = DataLoader(train_data, batch_size=64, shuffle=True)

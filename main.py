@@ -4,6 +4,9 @@ import pickle
 from simple_nn import SimpleNN
 from scipy.ndimage import gaussian_filter  # Import Gaussian filter
 
+def softmax(xs):
+    return np.exp(xs) / sum(np.exp(xs))
+
 # Initialize pygame
 pygame.init()
 
@@ -110,4 +113,4 @@ model = load_model()
 if pixel_values is not None:
     pixel_values = np.array(pixel_values)
     output, predicted_digit = model.forward(pixel_values)
-    print("Predicted digit:", predicted_digit)
+    print("Predicted digit:\33[32m\033[1m", predicted_digit, "\033[0m", "Probability:", round(softmax(output[0])[predicted_digit][0]*100, 2), "%")
