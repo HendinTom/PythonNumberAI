@@ -22,52 +22,49 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
     for epoch in range(epochs):
         total_loss = 0
         for i, (image, label) in enumerate(train_data):
-            # Flatten image to 784x1 vector and normalize pixel values
-            input_data = image.view(784).numpy()
+            # Flatten image and normalize
+            input_data = image.view(784).numpy().reshape(-1, 1)
             input_data = (input_data - np.min(input_data)) / (np.max(input_data) - np.min(input_data))
             
             # Forward pass
             output, _ = model.forward(input_data)
             
             # One-hot encode the label
-            target = np.zeros(10)
+            target = np.zeros((10, 1))
             target[label] = 1
             
-            # Compute loss (Mean Squared Error)
-            loss = np.mean((output.flatten() - target) ** 2)
+            # Compute loss
+            loss = np.mean((output - target) ** 2)
             total_loss += loss
             
             # Backpropagation
-            output_error = output.flatten() - target
-            
-            # Gradients for weights and biases of each layer
-            d_weights4 = np.dot(output_error.reshape(-1, 1), model.a3.T.reshape(1, -1))  # Shape (10, 16)
+            output_error = output - target  # Shape (10, 1)
+            d_weights4 = np.dot(output_error, model.a3.T)  # Shape (10, 64)
             d_biases4 = output_error
             
-            hidden_error3 = (np.dot(model.weights4.T, output_error) * model.a3 * (1 - model.a3)).flatten()  # Flatten to shape (16,)
-            d_weights3 = np.dot(hidden_error3.reshape(-1, 1), model.a2.T.reshape(1, -1))  # Shape (16, 16)
+            hidden_error3 = np.dot(model.weights4.T, output_error) * model.a3 * (1 - model.a3)  # Shape (64, 1)
+            d_weights3 = np.dot(hidden_error3, model.a2.T)  # Shape (64, 64)
             d_biases3 = hidden_error3
 
-            hidden_error2 = (np.dot(model.weights3.T, output_error) * model.a2 * (1 - model.a2)).flatten()  # Flatten to shape (16,)
-            d_weights2 = np.dot(hidden_error2.reshape(-1, 1), model.a1.T.reshape(1, -1))  # Shape (16, 16)
+            hidden_error2 = np.dot(model.weights3.T, hidden_error3) * model.a2 * (1 - model.a2)  # Shape (64, 1)
+            d_weights2 = np.dot(hidden_error2, model.a1.T)  # Shape (64, 64)
             d_biases2 = hidden_error2
-            
-            hidden_error1 = (np.dot(model.weights2.T, hidden_error2) * model.a1 * (1 - model.a1)).flatten()  # Flatten to shape (16,)
-            d_weights1 = np.dot(hidden_error1.reshape(-1, 1), input_data.reshape(1, -1))  # Shape (16, 784)
+
+            hidden_error1 = np.dot(model.weights2.T, hidden_error2) * model.a1 * (1 - model.a1)  # Shape (64, 1)
+            d_weights1 = np.dot(hidden_error1, input_data.T)  # Shape (64, 784)
             d_biases1 = hidden_error1
 
-            # Gradient descent update
+            # Gradient descent update for each layer
             model.weights4 -= learning_rate * d_weights4
-            model.biases4 -= learning_rate * d_biases4[:, None]
+            model.biases4 -= learning_rate * d_biases4
             model.weights3 -= learning_rate * d_weights3
-            model.biases3 -= learning_rate * d_biases3[:, None]
+            model.biases3 -= learning_rate * d_biases3
             model.weights2 -= learning_rate * d_weights2
-            model.biases2 -= learning_rate * d_biases2[:, None]
+            model.biases2 -= learning_rate * d_biases2
             model.weights1 -= learning_rate * d_weights1
-            model.biases1 -= learning_rate * d_biases1[:, None]
+            model.biases1 -= learning_rate * d_biases1
         
         print(f"Epoch {epoch + 1}, Loss: {total_loss / len(train_data)}")
-
 
 # Save the model parameters
 def save_model(model, filename="trained_model.pkl"):
@@ -78,18 +75,17 @@ def save_model(model, filename="trained_model.pkl"):
         "biases2": model.biases2,
         "weights3": model.weights3,
         "biases3": model.biases3,
-        "weights3": model.weights4,
-        "biases3": model.biases4,
+        "weights4": model.weights4,  # Ensure weights4 is saved
+        "biases4": model.biases4     # Ensure biases4 is saved
     }
     with open(filename, "wb") as f:
         pickle.dump(model_params, f)
-    print(f"Model saved to {filename}")
 
 # Main training procedure
 if __name__ == "__main__":
     train_data = load_mnist_data()
     model = SimpleNN()
-    train(model, train_data, epochs=5, learning_rate=0.01)
+    train(model, train_data, epochs=20, learning_rate=0.01)
     save_model(model)
 
     # train_loader = DataLoader(train_data, batch_size=64, shuffle=True)

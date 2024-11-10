@@ -104,6 +104,8 @@ def load_model(filename="trained_model.pkl"):
     model.biases2 = model_params["biases2"]
     model.weights3 = model_params["weights3"]
     model.biases3 = model_params["biases3"]
+    model.weights4 = model_params["weights4"]  # Add this line
+    model.biases4 = model_params["biases4"]    # And this line
     return model
 
 # Instantiate and load trained model
@@ -113,4 +115,4 @@ model = load_model()
 if pixel_values is not None:
     pixel_values = np.array(pixel_values)
     output, predicted_digit = model.forward(pixel_values)
-    print("Predicted digit:\33[32m\033[1m", predicted_digit, "\033[0m", "Probability:", round(softmax(output[0])[predicted_digit][0]*100, 2), "%")
+    print("Predicted digit:\33[32m\033[1m", predicted_digit, "\033[0m", "Probability:", round(softmax(output)[predicted_digit][0][0]*100, 2), "%")
