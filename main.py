@@ -2,19 +2,17 @@ import pygame
 import numpy as np
 import pickle
 from simple_nn import SimpleNN
+from scipy.ndimage import gaussian_filter  # Import Gaussian filter
 
 # Initialize pygame
 pygame.init()
-
-# Temporary variable to store the 784 pixel values as a list
-pixel_values = None
 
 # Constants
 GRID_SIZE = 28
 CELL_SIZE = 20  # Each cell on the canvas will be 20x20 pixels
 CANVAS_SIZE = GRID_SIZE * CELL_SIZE
-BRUSH_RADIUS = 3
-brush_intensity = 0.7
+BRUSH_RADIUS = 2  # Smaller brush radius for thinner strokes
+brush_intensity = 0.5  # Lower intensity for softer strokes
 
 # Colors
 WHITE = (255, 255, 255)
@@ -27,7 +25,6 @@ pygame.display.set_caption("28x28 Pixel Drawing")
 
 # Drawing settings
 draw_mode = True
-brush_intensity = 1.0  # The intensity at the center of the brush
 canvas = np.zeros((GRID_SIZE, GRID_SIZE))  # Stores grayscale pixel values between 0 and 1
 
 # Function to draw buttons
@@ -46,12 +43,9 @@ def draw_on_canvas(pos, intensity):
         for y in range(-BRUSH_RADIUS, BRUSH_RADIUS + 1):
             dx, dy = pos[0] // CELL_SIZE + x, pos[1] // CELL_SIZE + y
             if 0 <= dx < GRID_SIZE and 0 <= dy < GRID_SIZE:
-                # Calculate the distance and scale intensity to create a soft edge
                 dist = np.sqrt(x**2 + y**2)
                 if dist <= BRUSH_RADIUS:
-                    # Soft falloff effect based on distance from the center
                     alpha = max(0, (1 - dist / BRUSH_RADIUS)**2) * intensity
-                    # Adjust within bounds 0 to 1
                     if draw_mode:
                         canvas[dy, dx] = min(1, canvas[dy, dx] + alpha)
                     else:  # Erase mode
@@ -59,6 +53,8 @@ def draw_on_canvas(pos, intensity):
 
 # Main loop
 running = True
+pixel_values = None  # Store the final pixel values
+
 while running:
     screen.fill(BLACK)
     draw_buttons()
@@ -81,12 +77,10 @@ while running:
                 elif 80 <= y <= 120:
                     draw_mode = False
                 elif 140 <= y <= 180:
-                    # np.save("drawing.npy", canvas)  # Save pixel values to a .npy file
-                    # pygame.image.save(screen.subsurface((0, 0, CANVAS_SIZE, CANVAS_SIZE)), "drawing.png")
-                    # print("Image and pixel values saved.")
-                    # running = False
-                    pixel_values = canvas.flatten().tolist()
-                    print("Pixel values stored:", pixel_values)
+                    # Apply Gaussian blur for softer, MNIST-style strokes
+                    canvas_blurred = gaussian_filter(canvas, sigma=0.75)
+                    pixel_values = canvas_blurred.flatten().tolist()
+                    # print("Pixel values stored:", pixel_values)
                     running = False
         elif event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
             draw_on_canvas(pygame.mouse.get_pos(), brush_intensity)
@@ -112,8 +106,8 @@ def load_model(filename="trained_model.pkl"):
 # Instantiate and load trained model
 model = load_model()
 
-# Use `pixel_values` from the drawing as input to the model
-# Example: pixel_values = [0.0, 1.0, ...]  # 784-length list
-
-output, predicted_digit = model.forward(pixel_values)
-print("Predicted digit:", predicted_digit)
+# Convert pixel values to NumPy array and use as input to the model
+if pixel_values is not None:
+    pixel_values = np.array(pixel_values)
+    output, predicted_digit = model.forward(pixel_values)
+    print("Predicted digit:", predicted_digit)
