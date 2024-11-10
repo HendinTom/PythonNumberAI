@@ -21,6 +21,7 @@ def load_mnist_data():
 def train(model, train_data, epochs=5, learning_rate=0.01):
     for epoch in range(epochs):
         total_loss = 0
+        correct = 0
         for i, (image, label) in enumerate(train_data):
             # Flatten image and normalize
             input_data = image.view(784).numpy().reshape(-1, 1)
@@ -36,6 +37,11 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
             # Compute loss
             loss = np.mean((output - target) ** 2)
             total_loss += loss
+
+            #Get which ones it got right
+            for i in range (len(_)):
+                if np.array_equal(_[i], label):
+                    correct += 1
             
             # Backpropagation
             output_error = output - target  # Shape (10, 1)
@@ -64,7 +70,7 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
             model.weights1 -= learning_rate * d_weights1
             model.biases1 -= learning_rate * d_biases1
         
-        print(f"Epoch {epoch + 1}, Loss: {total_loss / len(train_data)}")
+        print(f"Epoch {epoch + 1}, Loss: {total_loss / len(train_data)}, Accruacy: {round((correct / len(train_data)) * 100, 2)}%")
 
 # Save the model parameters
 def save_model(model, filename="trained_model.pkl"):
