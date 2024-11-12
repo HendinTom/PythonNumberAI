@@ -12,7 +12,7 @@ This project demonstrates a neural network model trained to recognize handwritte
 - [License](#license)
 
 ## Overview
-The goal of this project is to build a simple, interactive application to demonstrate the power of neural networks in recognizing handwritten digits. The project consists of:
+The goal of this project is to build a simple, interactive application to demonstrate the power of neural networks in recognizing handwritten digits. This project is also more focused on readability and to help understand how a neural network learns. The project consists of:
 1. A neural network model that has been trained on the MNIST dataset using backpropagation to learn how to classify digits (0-9).
 2. A Pygame-based canvas where you can draw a digit and see if the model can recognize it.
 
@@ -22,6 +22,7 @@ The main files in this repository include:
 - `train.py`: Contains the code for building and training the neural network model. This model uses backpropagation to adjust its weights based on errors and improve accuracy.
 - `main.py`: The main application file. This file includes code to set up the Pygame canvas, take user input (drawn digits), and process that input through the trained model to classify the drawn digit.
 - `test.py`: This gives you a test you can do with the AI to see how well it does on the testing examples of the MNIST dataset
+- `cheking_images.py`: This is a file that allows you to save the first 100 images of the MNIST dataset, so you can see what the actual images you are using to train look like
 
 ## Installation
 To run this project locally, you'll need to have Python installed, as well as the following packages:
@@ -56,10 +57,10 @@ conda create --name pythonnumberai python=3.12
 ```bash
 python main.py
 ```
-3. A Pygame window will open, allowing you to draw a digit with your mouse. Once you finish drawing, the model will try to classify your input and display the recognized number on the screen.
+3. A Pygame window will open, allowing you to draw a digit with your mouse. Once you finish drawing, the model will try to classify your input and display the recognized number on the screen. P.S. When training the model, don't worry if there is not downloading bar as I showed in my demonstration. Since the data files are already there, there should be no need for the train.py file to download anything extra onto your computer.
 
 ## How it Works
-Model Training: The neural network is trained on the MNIST dataset, which consists of 60,000 training images of handwritten digits and 10,000 test images. During training, backpropagation is used to minimize the error rate, enabling the model to learn from its mistakes and improve its performance over time.
+Model Training: The neural network is trained on the MNIST dataset, which consists of 60,000 training images of handwritten digits and 10,000 test images. During training, backpropagation is used to minimize the error rate, enabling the model to learn from its mistakes and improve its performance over time. I have included a image that I drew to help depict what is actually going on visually.
 
 Drawing and Recognition: The main program creates a Pygame window that acts as a canvas for drawing. After the user draws a digit, the drawing is processed and resized to match the MNIST image format. The image data is then fed to the model, which outputs its prediction of the drawn digit.
 
