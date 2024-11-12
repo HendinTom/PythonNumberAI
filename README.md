@@ -1,4 +1,4 @@
-# Handwritten Digit Recognition using Neural Network and Pygame Canvas
+# Handwritten Digit Recognition With Simple Code and Explanations to Help in Understanding Neural Networks
 
 This project demonstrates a neural network model trained to recognize handwritten digits using the MNIST dataset. The model uses backpropagation to learn and achieve accurate digit recognition. Additionally, this program provides an interactive canvas, built using Pygame, where users can draw a digit, and the model will attempt to recognize the drawn number in real time.
 
