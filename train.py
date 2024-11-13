@@ -20,69 +20,99 @@ def load_mnist_data():
 
 def train(model, train_data, epochs=5, learning_rate=0.01):
     for epoch in range(epochs):
-        total_loss = 0
+        total_cost = 0
         correct = 0
         for i, (image, label) in enumerate(train_data):
             # Flatten image and normalize
             input_data = image.view(784).numpy().reshape(-1, 1)
             input_data = (input_data - np.min(input_data)) / (np.max(input_data) - np.min(input_data))
-            
+
+            test = np.array([[1, 2, 3],[4, 5, 6]]).T #Flipping it so that it can be multiplied with the correct numbers mulitplying
+            test1 = np.array([[7], [8], [9]])
+            test2 = np.sum(test * test1, axis=0)
+            # print(test2) #Flipping it back so that it returns to the correct shape
+
             # Forward pass
-            output, _ = model.forward(input_data)
+            output, prediction = model.forward(input_data)
             
-            # One-hot encode the label
-            target = np.zeros((10, 1))
-            target[label] = 1
+            # Making an array for the y value and setting the correct index to 1
+            y = np.zeros((10, 1))
+            y[label] = 1
             
             # Compute loss
-            loss = np.mean((output - target) ** 2)
-            total_loss += loss
+            cost = np.mean((output - y) ** 2)
+            total_cost += cost
 
             #Get which ones it got right
-            for i in range (len(_)):
-                if np.array_equal(_[i], label):
+            for i in range (len(prediction)):
+                if np.array_equal(prediction[i], label):
                     correct += 1
             
-            # Backpropagation
-            output_error = output - target  # Shape (10, 1)
-            d_weights4 = np.dot(output_error, model.a3.T)  # Shape (10, 64)
-            d_biases4 = output_error
+            # Backpropagation `d` - stands for derivative
+            d_cost_to_a3 = 2*(output - y) #What 2(a3 -y) looks like in code
+
+            d_z3_a3 = sig_derivative(model.z3)
+            d_weights3_to_z3 = model.a2
+            d_cost_to_weights3 = (d_weights3_to_z3.T * d_z3_a3 * d_cost_to_a3).T
+            # print(d_cost_to_weights3.shape)
+            d_cost_to_bias3 = (d_z3_a3 * d_cost_to_a3).T
+            # print(d_cost_to_bias3.shape)
+
+            d_cost_to_a2 = np.sum((model.weights3.T * d_z3_a3 * d_cost_to_a3).T, axis=1).reshape(1, -1)
+            # print(d_cost_to_a2.shape)
+
+            d_z2_to_a2 = sig_derivative(model.z2)
+            d_weights2_to_z2 = model.a1
+            d_cost_to_weights2 = (d_weights2_to_z2.T * d_z2_to_a2 * d_cost_to_a2).T
+            # print(d_cost_to_weights2.shape)
+            d_cost_to_bias2 = (d_z2_to_a2 * d_cost_to_a2.T).T
+            # print(d_cost_to_bias2.shape)
+
+            d_cost_to_a1 = np.sum((model.weights2.T * d_z2_to_a2 * d_cost_to_a2).T, axis=1).reshape(1, -1)
+            # print(d_cost_to_a1.shape)
             
-            hidden_error3 = np.dot(model.weights4.T, output_error) * model.a3 * (1 - model.a3)  # Shape (64, 1)
-            d_weights3 = np.dot(hidden_error3, model.a2.T)  # Shape (64, 64)
-            d_biases3 = hidden_error3
+            d_z1_to_a1 = sig_derivative(model.z1)
+            d_weights1_to_z1 = input_data
+            d_cost_to_weights1 = (d_weights1_to_z1.T * d_z1_to_a1 * d_cost_to_a1.T).T
+            print(d_cost_to_weights1.shape)
+            d_cost_to_bias1 = (d_z1_to_a1 * d_cost_to_a1.T).T
 
-            hidden_error2 = np.dot(model.weights3.T, hidden_error3) * model.a2 * (1 - model.a2)  # Shape (64, 1)
-            d_weights2 = np.dot(hidden_error2, model.a1.T)  # Shape (64, 64)
-            d_biases2 = hidden_error2
+            # print(model.biases2.shape)
+            # output_error = output - target  # Shape (10, 1)
+            # d_weights4 = np.dot(output_error, model.a3.T)  # Shape (10, 64)
+            # d_biases4 = output_error
+            
+            # hidden_error3 = np.dot(model.weights4.T, output_error) * model.a3 * (1 - model.a3)  # Shape (64, 1)
+            # d_weights3 = np.dot(hidden_error3, model.a2.T)  # Shape (64, 64)
+            # d_biases3 = hidden_error3
 
-            hidden_error1 = np.dot(model.weights2.T, hidden_error2) * model.a1 * (1 - model.a1)  # Shape (64, 1)
-            d_weights1 = np.dot(hidden_error1, input_data.T)  # Shape (64, 784)
-            d_biases1 = hidden_error1
+            # hidden_error2 = np.dot(model.weights3.T, hidden_error3) * model.a2 * (1 - model.a2)  # Shape (64, 1)
+            # d_weights2 = np.dot(hidden_error2, model.a1.T)  # Shape (64, 64)
+            # d_biases2 = hidden_error2
 
-            # Gradient descent update for each layer
-            model.weights4 -= learning_rate * d_weights4
-            model.biases4 -= learning_rate * d_biases4
-            model.weights3 -= learning_rate * d_weights3
-            model.biases3 -= learning_rate * d_biases3
-            model.weights2 -= learning_rate * d_weights2
-            model.biases2 -= learning_rate * d_biases2
-            model.weights1 -= learning_rate * d_weights1
-            model.biases1 -= learning_rate * d_biases1
+            # hidden_error1 = np.dot(model.weights2.T, hidden_error2) * model.a1 * (1 - model.a1)  # Shape (64, 1)
+            # d_weights1 = np.dot(hidden_error1, input_data.T)  # Shape (64, 784)
+            # d_biases1 = hidden_error1
+
+            # # Gradient descent update for each layer
+            model.weights3 -= learning_rate * d_cost_to_weights3
+            model.biases3 -= learning_rate * d_cost_to_bias3
+            model.weights2 -= learning_rate * d_cost_to_weights2
+            model.biases2 -= learning_rate * d_cost_to_bias2
+            model.weights1 -= learning_rate * d_cost_to_weights1
+            model.biases1 -= learning_rate * d_cost_to_bias1
         
-        print(f"Epoch {epoch + 1}, Loss: {total_loss / len(train_data)}, Accruacy: {round((correct / len(train_data)) * 100, 2)}%")
+        print(f"Epoch {epoch + 1}, Loss: {total_cost / len(train_data)}, Accruacy: {round((correct / len(train_data)) * 100, 2)}%")
 
 # Save the model parameters
-def save_model(model, filename="trained_model.pkl"):
+def save_model(model, filename="trained_model1.pkl"):
     model_params = {
         "weights1": model.weights1,
         "biases1": model.biases1,
         "weights2": model.weights2,
         "biases2": model.biases2,
         "weights3": model.weights3,
-        "biases3": model.biases3,
-        "weights4": model.weights4,  # Ensure weights4 is saved
-        "biases4": model.biases4     # Ensure biases4 is saved
+        "biases3": model.biases3
     }
     with open(filename, "wb") as f:
         pickle.dump(model_params, f)
@@ -91,7 +121,7 @@ def save_model(model, filename="trained_model.pkl"):
 if __name__ == "__main__":
     train_data = load_mnist_data()
     model = SimpleNN()
-    train(model, train_data, epochs=20, learning_rate=0.01)
+    train(model, train_data, epochs=5, learning_rate=10)
     save_model(model)
 
     # train_loader = DataLoader(train_data, batch_size=64, shuffle=True)
