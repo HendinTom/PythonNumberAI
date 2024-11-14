@@ -14,6 +14,7 @@ def sig_derivative(x):
 def load_mnist_data(batch_size=100):
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
     train_loader = datasets.MNIST(root="./data", train=True, download=True, transform=transform)
+    # Making the data into batches of random numbers from the training set
     train_data = DataLoader(train_loader, batch_size=batch_size, shuffle=True)
     return train_data
 
@@ -37,11 +38,12 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
             for i in range(len(data)):
                 image = data[i]
                 label = targets[i]
-                # Flatten image and normalize
-                input_data = image.view(784).numpy()#.reshape(-1, 1) #without reshape: (784,). With reshape (784, 1)
-                input_data = (input_data - np.min(input_data)) / (np.max(input_data) - np.min(input_data))
-                # print(targets)
 
+                # Flatten image and normalize the image to (784,)
+                input_data = image.view(784).numpy()
+                input_data = (input_data - np.min(input_data)) / (np.max(input_data) - np.min(input_data))
+
+                #*This section here is just if you want to conduct some tests on how arrays get multiplied together and how to shape them to do what you want them to do
                 # test = np.array([[1, 2], [3, 4], [5, 6]]) #Flipping it so that it can be multiplied with the correct numbers mulitplying
                 # test1 = np.array([7, 8, 9])
                 # print(test.shape)
@@ -60,7 +62,6 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
                 total_cost += cost
 
                 #Get which ones it got right
-                # print(prediction, label)
                 if prediction == label:
                     correct += 1
                 
@@ -99,19 +100,16 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
                 d_cost_to_bias1 = (d_z1_to_a1 * d_cost_to_a1).reshape(1, -1)
                 d_avg_cost_to_bias1 += d_cost_to_bias1
                 # print(d_cost_to_bias1.shape)
-                # break
 
-            model.weights3 -= learning_rate * d_avg_cost_to_weights3#d_cost_to_weights3
-            model.biases3 -= learning_rate * d_avg_cost_to_bias3#d_cost_to_bias3
-            model.weights2 -= learning_rate * d_avg_cost_to_weights2#d_cost_to_weights2
-            model.biases2 -= learning_rate * d_avg_cost_to_bias2#d_cost_to_bias2
-            model.weights1 -= learning_rate * d_avg_cost_to_weights1#d_cost_to_weights1
-            model.biases1 -= learning_rate * d_avg_cost_to_bias1#d_cost_to_bias1
-            # # Gradient descent update for each layer
+            # Gradient descent update for each layer
+            model.weights3 -= learning_rate * d_avg_cost_to_weights3
+            model.biases3 -= learning_rate * d_avg_cost_to_bias3
+            model.weights2 -= learning_rate * d_avg_cost_to_weights2
+            model.biases2 -= learning_rate * d_avg_cost_to_bias2
+            model.weights1 -= learning_rate * d_avg_cost_to_weights1
+            model.biases1 -= learning_rate * d_avg_cost_to_bias1
     
-            # break
         print(f"Epoch {epoch + 1}, Loss: {total_cost / len(train_data)}, Accruacy: {round((correct / len(train_data)), 2)}%")
-        # break
 
 # Save the model parameters
 def save_model(model, filename="trained_model.pkl"):
