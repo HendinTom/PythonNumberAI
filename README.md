@@ -21,6 +21,7 @@ The main files in this repository include:
 
 - `train.py`: Contains the code for building and training the neural network model. This model uses backpropagation to adjust its weights based on errors and improve accuracy.
 - `main.py`: The main application file. This file includes code to set up the Pygame canvas, take user input (drawn digits), and process that input through the trained model to classify the drawn digit.
+- `simple_nn.py`: The file that contains the structure for the AI.
 - `test.py`: This gives you a test you can do with the AI to see how well it does on the testing examples of the MNIST dataset
 - `cheking_images.py`: This is a file that allows you to save the first 100 images of the MNIST dataset, so you can see what the actual images you are using to train look like
 
