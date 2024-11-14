@@ -68,5 +68,5 @@ Drawing and Recognition: The main program creates a Pygame window that acts as a
 ## Contributing
 Contributions are welcome! If you’d like to improve the model’s accuracy, optimize the drawing interface, or add new features, please fork the repository and submit a pull request.
 
-## Liscence
+## License
 This project is licensed under the Apache-2.0 License - see the LICENSE file for details.
