@@ -17,7 +17,6 @@ class SimpleNN:
         
         # Layer 1
         #Flipping weights1 to go from (784, 16) to (16, 784) because I want there to be 784 columns to allow for multiplicaiton
-        #!Don't change this now because it perfectly resembles what the network should look like (need to update the whiteboard)
         self.z1 = np.sum((self.weights1.T * x) + self.biases1.T, axis=1)
         self.a1 = sig(self.z1)
 
