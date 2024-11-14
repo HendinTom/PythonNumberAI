@@ -115,4 +115,4 @@ model = load_model()
 if pixel_values is not None:
     pixel_values = np.array(pixel_values)
     output, predicted_digit = model.forward(pixel_values)
-    print("Predicted digit:\33[32m\033[1m>>>", predicted_digit, "<<<\033[0m")#, "Confidence:", round(softmax(output)[predicted_digit][0]*100, 2), "%")
+    print("Predicted digit:\33[32m\033[1m>>>", predicted_digit, "<<<\033[0m", "  Confidence:", round(softmax(output)[predicted_digit]*100, 2), "%")
