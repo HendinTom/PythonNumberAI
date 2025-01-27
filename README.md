@@ -42,7 +42,7 @@ pip install pygame numpy torchvision pickle scipy
 
 Or you can install it with conda, which is what I did and recommend:
 ```bash
-conda install -c conda-forge -c pytroch numpy pygame torchvision scipy
+conda install -c conda-forge -c pytorch numpy pygame torchvision scipy
 ```
 ## Usage
 1. Clone the repository:
