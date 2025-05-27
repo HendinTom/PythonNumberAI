@@ -113,4 +113,6 @@ model = load_model()
 if pixel_values is not None:
     pixel_values = np.array(pixel_values)
     output, predicted_digit = model.forward(pixel_values)
-    print("Predicted digit:\33[32m\033[1m>>>", predicted_digit, "<<<\033[0m", "  Confidence:", round(softmax(output)[predicted_digit]*100, 2), "%")
+    predicted_digit = int(predicted_digit[0])  # Extract scalar from array
+    confidence = softmax(output[0])[predicted_digit] * 100  # Use output[0] for correct shape
+    print("Predicted digit:\33[32m\033[1m>>>", predicted_digit, "<<<\033[0m", "  Confidence:", round(confidence, 2), "%")

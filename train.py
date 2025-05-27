@@ -26,13 +26,25 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
         for batch_idx, (data, targets) in enumerate(train_data):
             # Initialize gradients to zero for each batch
             d_avg_cost_to_weights1 = np.zeros_like(model.weights1)
+            d_avg_cost_to_weights1Mw = np.zeros_like(model.weights1Mw)
+            d_avg_cost_to_weights1Mr = np.zeros_like(model.weights1Mr)
             d_avg_cost_to_bias1 = np.zeros_like(model.biases1)
+            d_avg_cost_to_bias1Mw = np.zeros_like(model.biases1Mw)
+            d_avg_cost_to_bias1Mr = np.zeros_like(model.biases1Mr)
 
             d_avg_cost_to_weights2 = np.zeros_like(model.weights2)
+            d_avg_cost_to_weights2Mw = np.zeros_like(model.weights2Mw)
+            d_avg_cost_to_weights2Mr = np.zeros_like(model.weights2Mr)
             d_avg_cost_to_bias2 = np.zeros_like(model.biases2)
+            d_avg_cost_to_bias2Mw = np.zeros_like(model.biases2Mw)
+            d_avg_cost_to_bias2Mr = np.zeros_like(model.biases2Mr)
 
             d_avg_cost_to_weights3 = np.zeros_like(model.weights3)
+            d_avg_cost_to_weights3Mw = np.zeros_like(model.weights3Mw)
+            d_avg_cost_to_weights3Mr = np.zeros_like(model.weights3Mr)
             d_avg_cost_to_bias3 = np.zeros_like(model.biases3)
+            d_avg_cost_to_bias3Mw = np.zeros_like(model.biases3Mw)
+            d_avg_cost_to_bias3Mr = np.zeros_like(model.biases3Mr)
 
             #Going through each image
             for i in range(len(data)):
@@ -52,54 +64,34 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
 
                 # Forward pass
                 output, prediction = model.forward(input_data)
-            
+
                 # Making an array for the y value and setting the correct index to 1
-                y = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+                y = np.zeros(10)
                 y[label] = 1
-                
+
                 # Compute loss
                 cost = np.mean((output - y) ** 2)
                 total_cost += cost
 
-                #Get which ones it got right
+                # Get which ones it got right
                 if prediction == label:
                     correct += 1
-                
-                # Backpropagation `d` - stands for derivative
-                d_cost_to_a3 = 2*(output - y) #What 2(a3 -y) looks like in code
 
-                d_z3_to_a3 = sig_derivative(model.z3)
-                d_weights3_to_z3 = model.a2
-                d_cost_to_weights3 = (d_weights3_to_z3[:, np.newaxis] * (d_z3_to_a3 * d_cost_to_a3))
-                d_avg_cost_to_weights3 += d_cost_to_weights3
-                # print("Cost to weights3:", d_cost_to_weights3.shape)
-                d_cost_to_bias3 = (d_z3_to_a3 * d_cost_to_a3).reshape(1, -1)
-                d_avg_cost_to_bias3 += d_cost_to_bias3
-                # print("Cost to bias3:", d_cost_to_bias3.shape)
+                # Backpropagation
+                d_cost_to_a3 = 2 * (output - y)  # shape: (1, 10)
+                d_z3_to_a3 = sig_derivative(model.z3)  # shape: (1, 10)
+                delta3 = d_cost_to_a3 * d_z3_to_a3  # shape: (1, 10)
 
-                d_cost_to_a2 = np.sum((model.weights3.T * (d_z3_to_a3 * d_cost_to_a3).reshape(-1, 1)).T, axis=1).reshape(1, -1)
-                # print(d_cost_to_a2.shape)
+                d_avg_cost_to_weights3 += np.outer(model.a2.flatten(), delta3.flatten())  # (16, 10)
+                d_avg_cost_to_bias3 += delta3  # (1, 10)
 
-                d_z2_to_a2 = sig_derivative(model.z2)
-                d_weights2_to_z2 = model.a1
-                d_cost_to_weights2 = (d_weights2_to_z2[:, np.newaxis] * (d_z2_to_a2 * d_cost_to_a2))
-                d_avg_cost_to_weights2 += d_cost_to_weights2
-                # print(d_cost_to_weights2.shape)
-                d_cost_to_bias2 = (d_z2_to_a2 * d_cost_to_a2).reshape(1, -1)
-                d_avg_cost_to_bias2 += d_cost_to_bias2
-                # print(d_cost_to_bias2.shape)
+                delta2 = np.dot(delta3, model.weights3.T) * sig_derivative(model.z2)  # (1, 16)
+                d_avg_cost_to_weights2 += np.outer(model.a1.flatten(), delta2.flatten())  # (16, 16)
+                d_avg_cost_to_bias2 += delta2  # (1, 16)
 
-                d_cost_to_a1 = np.sum((model.weights2.T * (d_z2_to_a2 * d_cost_to_a2).reshape(-1, 1)).T, axis=1).reshape(1, -1)
-                # print(d_cost_to_a1.shape)
-                
-                d_z1_to_a1 = sig_derivative(model.z1)
-                d_weights1_to_z1 = input_data
-                d_cost_to_weights1 = (d_weights1_to_z1[:, np.newaxis] * (d_z1_to_a1 * d_cost_to_a1))
-                d_avg_cost_to_weights1 += d_cost_to_weights1
-                # print(d_cost_to_weights1.shape)
-                d_cost_to_bias1 = (d_z1_to_a1 * d_cost_to_a1).reshape(1, -1)
-                d_avg_cost_to_bias1 += d_cost_to_bias1
-                # print(d_cost_to_bias1.shape)
+                delta1 = np.dot(delta2, model.weights2.T) * sig_derivative(model.z1)  # (1, 16)
+                d_avg_cost_to_weights1 += np.outer(input_data.flatten(), delta1.flatten())  # (784, 16)
+                d_avg_cost_to_bias1 += delta1  # (1, 16)
 
             # Gradient descent update for each layer
             model.weights3 -= learning_rate * d_avg_cost_to_weights3
@@ -129,4 +121,4 @@ if __name__ == "__main__":
     train_data = load_mnist_data(batch_size=100)
     model = SimpleNN()
     train(model, train_data, epochs=40, learning_rate=0.01)
-    save_model(model)
+    # save_model(model)
