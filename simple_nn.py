@@ -33,7 +33,7 @@ class SimpleNN:
 
     def forward(self, x):
         # Layer 1
-        np.set_printoptions(threshold=100000, linewidth=1000, precision=5, suppress=True)
+        # np.set_printoptions(threshold=100000, linewidth=1000, precision=5, suppress=True)
         self.z1 = np.dot(x, self.weights1) + self.biases1
         # print(np.sum(x * self.weights1.T, axis=1) + self.biases1)
         # print(np.dot(self.z1, self.weights1Mw) + self.biases1Mw)
