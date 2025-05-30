@@ -78,20 +78,108 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
                     correct += 1
 
                 # Backpropagation
+                #!Finished calculations
+                #*Third Layer
                 d_cost_to_a3 = 2 * (output - y)  # shape: (1, 10)
-                d_z3_to_a3 = sig_derivative(model.z3)  # shape: (1, 10)
-                delta3 = d_cost_to_a3 * d_z3_to_a3  # shape: (1, 10)
+                d_za3_to_a3 = sig_derivative(model.za3)
 
-                d_avg_cost_to_weights3 += np.outer(model.a2.flatten(), delta3.flatten())  # (16, 10)
-                d_avg_cost_to_bias3 += delta3  # (1, 10)
+                #Reading Memory Parameters: Layer 3
+                d_cost_to_weights3Mr = model.memory * d_za3_to_a3 * d_cost_to_a3
+                d_cost_to_bias3Mr = 1 * d_za3_to_a3 * d_cost_to_a3
 
-                delta2 = np.dot(delta3, model.weights3.T) * sig_derivative(model.z2)  # (1, 16)
-                d_avg_cost_to_weights2 += np.outer(model.a1.flatten(), delta2.flatten())  # (16, 16)
-                d_avg_cost_to_bias2 += delta2  # (1, 16)
+                d_avg_cost_to_weights3Mr += d_cost_to_weights3Mr
+                d_avg_cost_to_bias3Mr += d_cost_to_bias3Mr
 
-                delta1 = np.dot(delta2, model.weights2.T) * sig_derivative(model.z1)  # (1, 16)
-                d_avg_cost_to_weights1 += np.outer(input_data.flatten(), delta1.flatten())  # (784, 16)
-                d_avg_cost_to_bias1 += delta1  # (1, 16)
+                #Writing Memory Parameters: Layer 3
+                d_memory_to_za3 = model.weights3Mr
+
+                d_cost_to_weights3Mw = model.z3 * d_memory_to_za3 * d_za3_to_a3
+                d_cost_to_bias3Mw = 1 * d_memory_to_za3 * d_za3_to_a3
+
+                d_avg_cost_to_weights3Mw += d_cost_to_weights3Mw
+                d_avg_cost_to_bias3Mw += d_cost_to_bias3Mw
+
+                #Last Layer Parameters
+                d_z3_to_memory = model.weights3Mw
+
+                d_cost_to_weights3 = model.a2 * d_z3_to_memory * d_memory_to_za3 * d_za3_to_a3
+                d_cost_to_bias3 = 1 * d_z3_to_memory * d_memory_to_za3 * d_za3_to_a3
+
+                d_avg_cost_to_weights3 += d_cost_to_weights3
+                d_avg_cost_to_bias3 += d_cost_to_bias3
+
+                #*Second Layer
+                d_cost_to_a2 = model.weights3 * d_z3_to_memory * d_memory_to_za3 * d_za3_to_a3
+                d_za2_to_a2 = sig_derivative(model.za2)
+
+                #Reading Memory Parameters: Layer 2
+                d_cost_to_weights2Mr = model.memory * d_za2_to_a2 * d_cost_to_a2
+                d_cost_to_bias2Mr = 1 * d_za2_to_a2 * d_cost_to_a2
+
+                d_avg_cost_to_weights2Mr += d_cost_to_weights2Mr
+                d_avg_cost_to_bias2Mr += d_cost_to_bias2Mr
+
+                #Writing Memory Parameters: Layer 2
+                d_memory_to_za2 = model.weights2Mr
+
+                d_cost_to_weights2Mw = model.z2 * d_memory_to_za2 * d_za2_to_a2
+                d_cost_to_bias2Mw = 1 * d_memory_to_za2 * d_za2_to_a2
+
+                d_avg_cost_to_weights2Mw += d_cost_to_weights2Mw
+                d_avg_cost_to_bias2Mw += d_cost_to_bias2Mw
+
+                #Second Last Layer Parameters
+                d_z2_to_memory = model.weights2Mw
+
+                d_cost_to_weights2 = model.a1 * d_z2_to_memory * d_memory_to_za2 * d_za2_to_a2
+                d_cost_to_bias2 = 1 * d_z2_to_memory * d_memory_to_za2 * d_za2_to_a2
+
+                d_avg_cost_to_weights2 += d_cost_to_weights2
+                d_avg_cost_to_bias2 += d_cost_to_bias2
+
+                #*Third Layer
+                d_cost_to_a1 = model.weights2 * d_z2_to_memory * d_memory_to_za2 * d_za2_to_a2
+                d_za1_to_a1 = sig_derivative(model.za1)
+
+                #Reading Memory Parameters: Layer 1
+                d_cost_to_weights1Mr = model.memory * d_za1_to_a1 * d_cost_to_a1
+                d_cost_to_bias1Mr = 1 * d_za1_to_a1 * d_cost_to_a1
+
+                d_avg_cost_to_weights1Mr += d_cost_to_weights1Mr
+                d_avg_cost_to_bias1Mr += d_cost_to_bias1Mr
+
+                #Writing Memory Parameters: Layer 1
+                d_memory_to_za1 = model.weights1Mr
+
+                d_cost_to_weights1Mw = model.z1 * d_memory_to_za1 * d_za1_to_a1
+                d_cost_to_bias1Mw = 1 * d_memory_to_za1 * d_za1_to_a1
+
+                d_avg_cost_to_weights1Mw += d_cost_to_weights1Mw
+                d_avg_cost_to_bias1Mw += d_cost_to_bias1Mw
+
+                #First Layer Parameters
+                d_z1_to_memory = model.weights1Mw
+
+                d_cost_to_weights1 = input_data * d_z1_to_memory * d_memory_to_za1 * d_za1_to_a1
+                d_cost_to_bias1 = 1 * d_z1_to_memory * d_memory_to_za1 * d_za1_to_a1
+
+                d_avg_cost_to_weights1 += d_cost_to_weights1
+                d_avg_cost_to_bias1 += d_cost_to_bias1
+
+
+                # d_z3_to_a3 = sig_derivative(model.z3)  # shape: (1, 10)
+                # delta3 = d_cost_to_a3 * d_z3_to_a3  # shape: (1, 10)
+
+                # d_avg_cost_to_weights3 += np.outer(model.a2.flatten(), delta3.flatten())  # (16, 10)
+                # d_avg_cost_to_bias3 += delta3  # (1, 10)
+
+                # delta2 = np.dot(delta3, model.weights3.T) * sig_derivative(model.z2)  # (1, 16)
+                # d_avg_cost_to_weights2 += np.outer(model.a1.flatten(), delta2.flatten())  # (16, 16)
+                # d_avg_cost_to_bias2 += delta2  # (1, 16)
+
+                # delta1 = np.dot(delta2, model.weights2.T) * sig_derivative(model.z1)  # (1, 16)
+                # d_avg_cost_to_weights1 += np.outer(input_data.flatten(), delta1.flatten())  # (784, 16)
+                # d_avg_cost_to_bias1 += delta1  # (1, 16)
 
             # Gradient descent update for each layer
             model.weights3 -= learning_rate * d_avg_cost_to_weights3
