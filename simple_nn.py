@@ -45,15 +45,15 @@ class SimpleNN:
 
         # Layer 2
         self.z2 = np.dot(self.a1, self.weights2) + self.biases2
-        self.memory += np.dot(self.z2, self.weights2Mw) + self.biases2Mw
-        self.za2 = self.memory * self.weights2Mr
+        self.memory2 = self.memory + np.dot(self.z2, self.weights2Mw) + self.biases2Mw
+        self.za2 = self.memory2 * self.weights2Mr
         self.za2A = np.sum(self.za2, axis=1) + self.biases2Mr
         self.a2 = sig(self.za2A)
 
         # Layer 3
         self.z3 = np.dot(self.a2, self.weights3) + self.biases3
-        self.memory += np.dot(self.z3, self.weights3Mw) + self.biases3Mw
-        self.za3 = self.memory * self.weights3Mr
+        self.memory3 = self.memory2 + np.dot(self.z3, self.weights3Mw) + self.biases3Mw
+        self.za3 = self.memory3 * self.weights3Mr
         self.za3A = np.sum(self.za3, axis=1) + self.biases3Mr
         self.a3 = sig(self.za3A)
 
