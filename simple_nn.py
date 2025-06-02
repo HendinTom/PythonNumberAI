@@ -22,7 +22,6 @@ class SimpleNN:
 
         # Layer 2
         self.z2 = np.sum((self.weights2.T * self.a1) + self.biases2.T, axis=1)
-        print((self.weights2.T * self.a1).shape)
         self.a2 = sig(self.z2)
 
         # Layer 3
