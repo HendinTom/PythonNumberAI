@@ -102,7 +102,10 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
                 #Last Layer Parameters
                 d_z3_to_memory = model.weights3Mw
 
-                d_cost_to_weights3 = model.a2 * d_z3_to_memory * d_memory_to_za3 * d_za3_to_a3 * d_cost_to_a3
+                # print("der of z3 to memory:", d_z3_to_memory.shape)
+                # print("der of za3 to a3:", d_za3_to_a3.shape)
+                d_weights3_to_z3 = np.tile(model.a2.flatten(), (10, 1)).T
+                d_cost_to_weights3 = d_weights3_to_z3 * d_z3_to_memory * d_memory_to_za3 * d_za3_to_a3 * d_cost_to_a3
                 d_cost_to_bias3 = 1 * d_z3_to_memory * d_memory_to_za3 * d_za3_to_a3 * d_cost_to_a3
 
                 d_avg_cost_to_weights3 += d_cost_to_weights3
@@ -165,21 +168,6 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
 
                 d_avg_cost_to_weights1 += d_cost_to_weights1
                 d_avg_cost_to_bias1 += d_cost_to_bias1
-
-
-                # d_z3_to_a3 = sig_derivative(model.z3)  # shape: (1, 10)
-                # delta3 = d_cost_to_a3 * d_z3_to_a3  # shape: (1, 10)
-
-                # d_avg_cost_to_weights3 += np.outer(model.a2.flatten(), delta3.flatten())  # (16, 10)
-                # d_avg_cost_to_bias3 += delta3  # (1, 10)
-
-                # delta2 = np.dot(delta3, model.weights3.T) * sig_derivative(model.z2)  # (1, 16)
-                # d_avg_cost_to_weights2 += np.outer(model.a1.flatten(), delta2.flatten())  # (16, 16)
-                # d_avg_cost_to_bias2 += delta2  # (1, 16)
-
-                # delta1 = np.dot(delta2, model.weights2.T) * sig_derivative(model.z1)  # (1, 16)
-                # d_avg_cost_to_weights1 += np.outer(input_data.flatten(), delta1.flatten())  # (784, 16)
-                # d_avg_cost_to_bias1 += delta1  # (1, 16)
 
             # Gradient descent update for each layer
             model.weights3 -= learning_rate * d_avg_cost_to_weights3
