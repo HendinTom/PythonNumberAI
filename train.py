@@ -81,10 +81,10 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
                 #!Finished calculations
                 #*Third Layer
                 d_cost_to_a3 = 2 * (output - y)  # shape: (1, 10)
-                d_za3_to_a3 = sig_derivative(model.za3)
+                d_za3_to_a3 = sig_derivative(model.za3) #za3A because that is when the bias is added
 
                 #Reading Memory Parameters: Layer 3
-                d_cost_to_weights3Mr = model.memory * d_za3_to_a3 * d_cost_to_a3.T
+                d_cost_to_weights3Mr = model.memory * d_za3_to_a3.T * d_cost_to_a3.T #*Make sure this multiplies out correctly
                 d_cost_to_bias3Mr = 1 * np.sum(d_za3_to_a3 * d_cost_to_a3.T, axis=1)
 
                 d_avg_cost_to_weights3Mr += d_cost_to_weights3Mr
@@ -93,26 +93,28 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
                 #Writing Memory Parameters: Layer 3
                 d_memory_to_za3 = model.weights3Mr
 
-                d_cost_to_weights3Mw = model.z3 * d_memory_to_za3.T * d_za3_to_a3.T * d_cost_to_a3
-                d_cost_to_bias3Mw = 1 * d_memory_to_za3.T * d_za3_to_a3.T * d_cost_to_a3
+                d_cost_to_weights3Mw = model.z3.T * d_memory_to_za3 * d_za3_to_a3.T * d_cost_to_a3.T
+                d_cost_to_bias3Mw = 1 * d_memory_to_za3.T * d_za3_to_a3 * d_cost_to_a3
 
-                d_avg_cost_to_weights3Mw += d_cost_to_weights3Mw.T
+                d_avg_cost_to_weights3Mw += d_cost_to_weights3Mw
                 d_avg_cost_to_bias3Mw += np.sum(d_cost_to_bias3Mw, axis=1)
 
                 #Last Layer Parameters
                 d_z3_to_memory = model.weights3Mw
 
                 # print("der of z3 to memory:", d_z3_to_memory.shape)
-                # print("der of za3 to a3:", d_za3_to_a3.shape)
+                print("der of za3 to a3:", d_za3_to_a3.shape)
+                # print(d_z3_to_memory.shape)
+                # print(d_cost_to_a3.shape)
                 d_weights3_to_z3 = np.tile(model.a2.flatten(), (10, 1)).T
-                d_cost_to_weights3 = d_weights3_to_z3 * d_z3_to_memory * d_memory_to_za3 * d_za3_to_a3 * d_cost_to_a3
-                d_cost_to_bias3 = 1 * d_z3_to_memory * d_memory_to_za3 * d_za3_to_a3 * d_cost_to_a3
+                d_cost_to_weights3 = d_weights3_to_z3 * np.sum(d_z3_to_memory, axis=1).T * np.sum(d_memory_to_za3, axis=1).T * d_za3_to_a3 * d_cost_to_a3
+                d_cost_to_bias3 = 1 * np.sum(d_z3_to_memory, axis=1).T * np.sum(d_memory_to_za3, axis=1).T * d_za3_to_a3 * d_cost_to_a3
 
                 d_avg_cost_to_weights3 += d_cost_to_weights3
                 d_avg_cost_to_bias3 += d_cost_to_bias3
 
                 #*Second Layer
-                d_cost_to_a2 = model.weights3 * d_z3_to_memory * d_memory_to_za3 * d_za3_to_a3
+                d_cost_to_a2 = model.weights3 * np.sum(d_z3_to_memory, axis=1).T * np.sum(d_memory_to_za3, axis=1).T * d_za3_to_a3
                 d_za2_to_a2 = sig_derivative(model.za2)
 
                 #Reading Memory Parameters: Layer 2
@@ -140,7 +142,7 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
                 d_avg_cost_to_weights2 += d_cost_to_weights2
                 d_avg_cost_to_bias2 += d_cost_to_bias2
 
-                #*Third Layer
+                #*First Layer
                 d_cost_to_a1 = model.weights2 * d_z2_to_memory * d_memory_to_za2 * d_za2_to_a2
                 d_za1_to_a1 = sig_derivative(model.za1)
 
