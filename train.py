@@ -92,6 +92,11 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
 
                 #Writing Memory Parameters: Layer 3
                 d_memory_to_za3 = model.weights3Mr
+                # Rechecking if this works because it doesn't in layer 2
+                print("model.z3.T shape:", model.z3.T.shape)
+                print("d_memory_to_za3 shape:", d_memory_to_za3.shape)
+                print("d_za3_to_a3.T shape:", d_za3_to_a3.T.shape)
+                print("d_cost_to_a3.T shape:", d_cost_to_a3.T.shape)
 
                 d_cost_to_weights3Mw = model.z3.T * d_memory_to_za3 * d_za3_to_a3.T * d_cost_to_a3.T
                 d_cost_to_bias3Mw = 1 * d_memory_to_za3.T * d_za3_to_a3 * d_cost_to_a3
@@ -103,7 +108,7 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
                 d_z3_to_memory = model.weights3Mw
 
                 # print("der of z3 to memory:", d_z3_to_memory.shape)
-                print("der of za3 to a3:", d_za3_to_a3.shape)
+                # print("der of za3 to a3:", d_za3_to_a3.shape)
                 # print(d_z3_to_memory.shape)
                 # print(d_cost_to_a3.shape)
                 d_weights3_to_z3 = np.tile(model.a2.flatten(), (10, 1)).T
@@ -118,26 +123,29 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
                 d_za2_to_a2 = sig_derivative(model.za2)
 
                 #Reading Memory Parameters: Layer 2
-                d_cost_to_weights2Mr = model.memory * d_za2_to_a2 * d_cost_to_a2
-                d_cost_to_bias2Mr = 1 * d_za2_to_a2 * d_cost_to_a2
+                A = model.memory2 # shape (16, 100)
+                B = d_za2_to_a2.T * d_cost_to_a2  # shape (16, 10)
+                B_expanded = np.repeat(B, 100 // B.shape[1], axis=1)  # (16, 100)
+                d_cost_to_weights2Mr = A * B_expanded  # (16, 100)
+                d_cost_to_bias2Mr = 1 * d_za2_to_a2 * np.sum(d_cost_to_a2, axis=1).T # (1, 16)
 
                 d_avg_cost_to_weights2Mr += d_cost_to_weights2Mr
                 d_avg_cost_to_bias2Mr += d_cost_to_bias2Mr
 
                 #Writing Memory Parameters: Layer 2
                 d_memory_to_za2 = model.weights2Mr
-
-                d_cost_to_weights2Mw = model.z2 * d_memory_to_za2 * d_za2_to_a2
-                d_cost_to_bias2Mw = 1 * d_memory_to_za2 * d_za2_to_a2
+                d_cost_to_weights2Mw = model.z2.T * d_memory_to_za2 * d_za2_to_a2.T * d_cost_to_a2.T
+                d_cost_to_bias2Mw = 1 * d_memory_to_za2.T * d_za2_to_a2 * d_cost_to_a2
 
                 d_avg_cost_to_weights2Mw += d_cost_to_weights2Mw
-                d_avg_cost_to_bias2Mw += d_cost_to_bias2Mw
+                d_avg_cost_to_bias2Mw += np.sum(d_cost_to_bias2Mw, axis=1).T
 
                 #Second Last Layer Parameters
                 d_z2_to_memory = model.weights2Mw
+                d_weights2_to_z2 = np.tile(model.a1.flatten(), (16, 1)).T
 
-                d_cost_to_weights2 = model.a1 * d_z2_to_memory * d_memory_to_za2 * d_za2_to_a2
-                d_cost_to_bias2 = 1 * d_z2_to_memory * d_memory_to_za2 * d_za2_to_a2
+                d_cost_to_weights2 = d_weights2_to_z2 * np.sum(d_z2_to_memory, axis=1).T * np.sum(d_memory_to_za2, axis=1).T * d_za2_to_a2 * d_cost_to_a2
+                d_cost_to_bias2 = 1 * d_z2_to_memory * d_memory_to_za2 * d_za2_to_a2 * d_cost_to_a2
 
                 d_avg_cost_to_weights2 += d_cost_to_weights2
                 d_avg_cost_to_bias2 += d_cost_to_bias2
