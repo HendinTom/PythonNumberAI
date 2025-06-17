@@ -93,10 +93,10 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
                 #Writing Memory Parameters: Layer 3
                 d_memory_to_za3 = model.weights3Mr
                 # Rechecking if this works because it doesn't in layer 2
-                print("model.z3.T shape:", model.z3.T.shape)
+                print("model.z3.T shape:", model.z3.shape)
                 print("d_memory_to_za3 shape:", d_memory_to_za3.shape)
-                print("d_za3_to_a3.T shape:", d_za3_to_a3.T.shape)
-                print("d_cost_to_a3.T shape:", d_cost_to_a3.T.shape)
+                print("d_za3_to_a3.T shape:", d_za3_to_a3.shape)
+                print("d_cost_to_a3.T shape:", d_cost_to_a3.shape)
 
                 d_cost_to_weights3Mw = model.z3.T * d_memory_to_za3 * d_za3_to_a3.T * d_cost_to_a3.T
                 d_cost_to_bias3Mw = 1 * d_memory_to_za3.T * d_za3_to_a3 * d_cost_to_a3
