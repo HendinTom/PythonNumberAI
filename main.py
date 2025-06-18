@@ -97,7 +97,7 @@ def load_model(filename="trained_model.pkl"):
     with open(filename, "rb") as f:
         model_params = pickle.load(f)
     
-    model = SimpleNN()
+    model = SimpleNN(input_size=784, hidden_size1=16, hidden_size2=16, output_size=10)
     model.weights1 = model_params["weights1"]
     model.biases1 = model_params["biases1"]
     model.weights2 = model_params["weights2"]

@@ -70,7 +70,7 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
 
                 d_z3_to_a3 = sig_derivative(model.z3)
                 d_weights3_to_z3 = model.a2
-                d_cost_to_weights3 = (d_weights3_to_z3[:, np.newaxis] * (d_z3_to_a3 * d_cost_to_a3))
+                d_cost_to_weights3 = np.outer(d_weights3_to_z3, (d_z3_to_a3 * d_cost_to_a3).flatten())
                 d_avg_cost_to_weights3 += d_cost_to_weights3
                 # print("Cost to weights3:", d_cost_to_weights3.shape)
                 d_cost_to_bias3 = (d_z3_to_a3 * d_cost_to_a3).reshape(1, -1)
@@ -82,7 +82,7 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
 
                 d_z2_to_a2 = sig_derivative(model.z2)
                 d_weights2_to_z2 = model.a1
-                d_cost_to_weights2 = (d_weights2_to_z2[:, np.newaxis] * (d_z2_to_a2 * d_cost_to_a2))
+                d_cost_to_weights2 = np.outer(d_weights2_to_z2, (d_z2_to_a2 * d_cost_to_a2).flatten())
                 d_avg_cost_to_weights2 += d_cost_to_weights2
                 # print(d_cost_to_weights2.shape)
                 d_cost_to_bias2 = (d_z2_to_a2 * d_cost_to_a2).reshape(1, -1)
@@ -94,7 +94,7 @@ def train(model, train_data, epochs=5, learning_rate=0.01):
                 
                 d_z1_to_a1 = sig_derivative(model.z1)
                 d_weights1_to_z1 = input_data
-                d_cost_to_weights1 = (d_weights1_to_z1[:, np.newaxis] * (d_z1_to_a1 * d_cost_to_a1))
+                d_cost_to_weights1 = np.outer(d_weights1_to_z1, (d_z1_to_a1 * d_cost_to_a1).flatten())
                 d_avg_cost_to_weights1 += d_cost_to_weights1
                 # print(d_cost_to_weights1.shape)
                 d_cost_to_bias1 = (d_z1_to_a1 * d_cost_to_a1).reshape(1, -1)
@@ -127,6 +127,6 @@ def save_model(model, filename="trained_model.pkl"):
 # Main training procedure
 if __name__ == "__main__":
     train_data = load_mnist_data(batch_size=100)
-    model = SimpleNN()
+    model = SimpleNN(input_size=784, hidden_size1=16, hidden_size2=16, output_size=10)
     train(model, train_data, epochs=40, learning_rate=0.01)
     save_model(model)
